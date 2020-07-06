@@ -2,11 +2,14 @@ import java.util.*;
 
 class Player extends Client {
     boolean isPlay; //игрок играет
+    ArrayList<Message> history_games;
 
     Player(String server, int port) {
         super(server, port);
+
         balance = 0;
         isPlay = true;
+        history_games = new ArrayList<Message>();
     }
 
     public void move() {
@@ -19,6 +22,11 @@ class Player extends Client {
         //Проверка хочет ли пользователь покинуть игру
         if (choice.equalsIgnoreCase("e")) {
             isPlay = false;
+            return;
+        }
+
+        if (choice.equalsIgnoreCase("history")) {
+            printHistory();
             return;
         }
 
@@ -51,6 +59,7 @@ class Player extends Client {
 
         //Подсчет баланса
         calculateBalance();
+        history_games.add(request_msg);
     }
 
 
@@ -62,6 +71,27 @@ class Player extends Client {
         else {
             balance -= request_msg.getBet();
             System.out.println("You lose :c! You lose " + request_msg.getBet() + "! Your current balance - " + balance + ". Try again");
+        }
+    }
+
+
+    //Вывод игровой истории
+    private void printHistory() {
+        String result; //Результат победы или поражения
+        int index; //индекс ставки
+
+        System.out.println("Your game history:");
+        for (int i = 0; i < history_games.size(); i++) {
+            index = i + 1;
+
+            Message game = history_games.get(i);
+
+            if (game.isWin())
+                result = "Win";
+            else
+                result = "Lose";
+
+            System.out.println(index + ") " + result + ". Choise: " + game.getChoice() + ", Bet: " + game.getBet());
         }
     }
 
@@ -81,6 +111,7 @@ class Player extends Client {
         System.out.println("Welcome to the game 'Heads and Tails'.");
         System.out.println("1. Print your choice (HEADS or TAILS) and your bet. #Example: HEADS 1000");
         System.out.println("2. Print 'e' to exit");
+        System.out.println("3. Print 'history' to show history games");
     }
 }
 
