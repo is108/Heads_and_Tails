@@ -97,7 +97,7 @@ class Client  {
 
 		public void run() {
 
-			//Получение нашего баланса от сервера
+			//Получение нашего стартового баланса от сервера
 			try {
 				balance = (Double) sockInput.readObject();
 			}
@@ -111,6 +111,7 @@ class Client  {
 				try {
 					//Получение сообщения от сервера
 					request_msg = (Message) sockInput.readObject();
+					balance = (Double) sockInput.readObject();
 				}
 				catch(IOException Ex) {
 					System.out.println("Server has closed the connection: " + Ex);
@@ -120,5 +121,6 @@ class Client  {
 				catch(ClassNotFoundException Ex) {}
 			}
 		}
+
 	}
 }

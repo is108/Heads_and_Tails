@@ -1,7 +1,5 @@
 
 class Casino  {
-    final private double balance_player = 10000.0; //Изначальный баланс игрока
-
     protected boolean calcVictory(String choice) {
         if (choice.equalsIgnoreCase("HEADS") && randomize()) //Если пользователь выбрал HEADS и число выпало больше 0.5
             return true;                                        //сообщить о победе
@@ -12,9 +10,7 @@ class Casino  {
     }
 
     private boolean randomize() {
-        double result =  Math.random();
-
-        return result > 0.5 ?  true :  false;
+        return Math.random() > 0.5;
     }
 
 }

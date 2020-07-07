@@ -1,7 +1,7 @@
 import java.util.*;
 
 class Player extends Client {
-    boolean isPlay; //игрок играет
+    boolean isPlay; // проверка играет ли игрок
     ArrayList<Message> history_games;
 
     Player(String server, int port) {
@@ -13,7 +13,6 @@ class Player extends Client {
     }
 
     public void move() {
-
         Scanner scan = new Scanner(System.in);
 
         System.out.println("Make your choice! HEADS or TAILS");
@@ -24,7 +23,7 @@ class Player extends Client {
             isPlay = false;
             return;
         }
-
+        //Проверка хочет ли пользователь узнать историю игр
         if (choice.equalsIgnoreCase("history")) {
             printHistory();
             return;
@@ -51,27 +50,20 @@ class Player extends Client {
             return;
         }
 
-        //Синхронизация потоков
+        //Синхронизация, для получения данных с сервера
         try {
             Thread.sleep(100);
         }
         catch(InterruptedException Ex) {}
 
-        //Подсчет баланса
-        calculateBalance();
-        history_games.add(request_msg);
-    }
-
-
-    private void calculateBalance() {
-        if (request_msg.isWin()) {
-            balance += request_msg.getBet();
+        //Вывод сообщения о победе или поражении
+        if (request_msg.isWin())
             System.out.println("Congrations! You win " + request_msg.getBet() + "! Your current balance - " + balance);
-        }
-        else {
-            balance -= request_msg.getBet();
+        else
             System.out.println("You lose :c! You lose " + request_msg.getBet() + "! Your current balance - " + balance + ". Try again");
-        }
+
+        //Добавление результата в историю игр
+        history_games.add(request_msg);
     }
 
 
@@ -93,11 +85,6 @@ class Player extends Client {
 
             System.out.println(index + ") " + result + ". Choise: " + game.getChoice() + ", Bet: " + game.getBet());
         }
-    }
-
-
-    public void setBalance(double balance) {
-        this.balance = balance;
     }
 
 

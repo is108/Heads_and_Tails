@@ -74,17 +74,20 @@ class Server extends Casino{
 
 
     //Отправка сообщения клиенту
-    private synchronized void broadcast(Message message, int id) {
+    private synchronized void broadcast(Message message, int id, double balance_player) {
         String time = current_time.format(new Date());
 
         System.out.println(time + " Сhoice player " + id + ": " + message.getChoice() + ". Bet player - " + message.getBet());
 
         //Подсчет того выиграл игрок или проиграл
         if (calcVictory(message.getChoice())) {
+            balance_player += message.getBet(); //изменение баланса
             message.setWin(true);
             System.out.println(time + " Player " + id + " win " + message.getBet());
+
         }
         else {
+            balance_player -= message.getBet(); //изменение баланса
             message.setWin(false);
             System.out.println(time + " Player " + id + " lose " + message.getBet());
         }
@@ -93,6 +96,7 @@ class Server extends Casino{
         for(int i = 0; i < clients.size(); i++) {
             ClientThread current_client = clients.get(i);
             if (current_client.id == id) {
+                current_client.setBalance(balance_player);
                 current_client.writeMsg(message);
                 break;
             }
@@ -115,17 +119,18 @@ class Server extends Casino{
 
     //отвечает за поток для каждого клиента
     class ClientThread extends Thread {
-        Socket socket;
-        ObjectInputStream sockInput;
-        ObjectOutputStream sockOutput;
-        int id; // Уникальный id клиента
-        Message msg; //Сообщение с запросом от клиента
-        String date; // Отметка времени
-
+        private Socket socket;
+        private ObjectInputStream sockInput;
+        private ObjectOutputStream sockOutput;
+        private int id; // Уникальный id игрока
+        private Message msg; //Сообщение с запросом от клиента
+        private String date; // Отметка времени
+        private double balance_player; //баланс игрока
 
         ClientThread(Socket socket) {
             id = ++client_id;
             this.socket = socket;
+            balance_player = 10000.0; //установка стартового баланска игроку
 
             msg = new Message();
 
@@ -141,7 +146,7 @@ class Server extends Casino{
                 //Выдать игроку баланс 10000 монет
                 if (create.equalsIgnoreCase("create player")) {
                     try {
-                        sockOutput.writeObject(10000.0);
+                        sockOutput.writeObject(balance_player);
                     }
                     catch (IOException Ex) {
                         System.out.println("Error set balance to player " + id + ". " + Ex);
@@ -160,6 +165,9 @@ class Server extends Casino{
             date = new Date().toString() + "\n";
         }
 
+        void setBalance(double balance_player) {
+            this.balance_player = balance_player;
+        }
 
         // Цикл для чтения выбора игрока и отправки ему результата
         public void run() {
@@ -179,7 +187,7 @@ class Server extends Casino{
                 }
 
                 // Отправление сообщения в обработку
-                broadcast(msg, id);
+                broadcast(msg, id, balance_player);
 
             }
 
@@ -222,6 +230,7 @@ class Server extends Casino{
             //Записываем ответ в поток
             try {
                 sockOutput.writeObject(msg);
+                sockOutput.writeObject(balance_player);
             }
             catch(IOException Ex) {
                 System.out.println("Error sending message to " + id + ". " + Ex);
