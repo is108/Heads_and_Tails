@@ -1,14 +1,12 @@
 import java.util.*;
 
 class Player extends Client {
-    boolean isPlay; // проверка играет ли игрок
     ArrayList<Message> history_games;
 
     Player(String server, int port) {
         super(server, port);
 
         balance = 0;
-        isPlay = true;
         history_games = new ArrayList<Message>();
     }
 
@@ -38,32 +36,37 @@ class Player extends Client {
             System.out.println("Not a number");
             return;
         }
+	
+        if (isPlay) {
+	    if (choice.equalsIgnoreCase("HEADS") && (bet > 0 && bet <= balance)) {
+	        sendMessage(new Message(choice, bet));
+	    }
+	    else if (choice.equalsIgnoreCase("TAILS") && (bet > 0 && bet <= balance)) {
+	        sendMessage(new Message(choice, bet));
+	    }
+	    else {
+	        System.out.println("Incorrect data");
+	        return;
+	    }
 
-        if (choice.equalsIgnoreCase("HEADS") && (bet > 0 && bet <= balance)) {
-            sendMessage(new Message(choice, bet));
-        }
-        else if (choice.equalsIgnoreCase("TAILS") && (bet > 0 && bet <= balance)) {
-            sendMessage(new Message(choice, bet));
-        }
-        else {
-            System.out.println("Incorrect data");
-            return;
-        }
+	    //Синхронизация, для получения данных с сервера
+	    try {
+	        Thread.sleep(100);
+	    }
+	    catch(InterruptedException Ex) {}
 
-        //Синхронизация, для получения данных с сервера
-        try {
-            Thread.sleep(100);
-        }
-        catch(InterruptedException Ex) {}
+	    //Вывод сообщения о победе или поражении
+            if (request_msg.isWin())
+	        System.out.println("Congrations! You win " + request_msg.getBet() + "! Your current balance - " + balance);
+	    else
+	        System.out.println("You lose :c! You lose " + request_msg.getBet() + "! Your current balance - " + balance + ". Try again");
 
-        //Вывод сообщения о победе или поражении
-        if (request_msg.isWin())
-            System.out.println("Congrations! You win " + request_msg.getBet() + "! Your current balance - " + balance);
-        else
-            System.out.println("You lose :c! You lose " + request_msg.getBet() + "! Your current balance - " + balance + ". Try again");
-
-        //Добавление результата в историю игр
-        history_games.add(request_msg);
+	    //Добавление результата в историю игр
+	    history_games.add(request_msg);
+	}
+	else {
+	    System.out.println("End game. Your current balance - " + balance);		
+	}
     }
 
 
@@ -96,7 +99,7 @@ class Player extends Client {
     //Вывод меню, в котором указаны инструкции для игрока
     public void printGameMenu() {
         System.out.println("Welcome to the game 'Heads and Tails'.");
-        System.out.println("1. Print your choice (HEADS or TAILS) and your bet. #Example: HEADS 1000");
+        System.out.println("1. Print your choice (HEADS or TAILS) and your bet.");
         System.out.println("2. Print 'e' to exit");
         System.out.println("3. Print 'history' to show history games");
     }
