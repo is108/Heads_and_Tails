@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 
 class Client  {
+	public boolean isPlay; // проверка играет ли игрок
 
 	private ObjectInputStream sockInput;
 	private ObjectOutputStream sockOutput;
@@ -17,6 +18,8 @@ class Client  {
 		this.server = server;
 		this.port = port;
 		this.balance = 0;
+		
+		isPlay = true;
 
 		request_msg = new Message();
 	}
@@ -115,6 +118,7 @@ class Client  {
 				}
 				catch(IOException Ex) {
 					System.out.println("Server has closed the connection: " + Ex);
+					isPlay = false;
 					break;
 					//System.exit();
 				}
